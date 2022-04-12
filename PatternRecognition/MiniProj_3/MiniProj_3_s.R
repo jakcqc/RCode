@@ -11,6 +11,14 @@ pxabcd = function(x,a,b,c,d)
   dIndex = 1
   
   #find parent class prob first
+  if(all(a == 0))
+  {
+    a[1,] = 1
+  }
+  if(all(b == 0))
+  {
+    b[1,] = 1
+  }
   for(ab in X[,x])
   {
     PP = PP + (a[aIndex] * b[bIndex%%3 + 1] * ab)
@@ -20,9 +28,7 @@ pxabcd = function(x,a,b,c,d)
        aIndex = aIndex + 1
     }
   }
-  print("Parent Prob")
-  print(PP)
-  return(PP)
+  
   #find child liklihood
   for(xc in C[x,])
   {
@@ -34,24 +40,101 @@ pxabcd = function(x,a,b,c,d)
     PD = PD + (xd * d[dIndex])
     dIndex = dIndex + 1
   }
-  
+  if(PD == 0)
+  {
+    PD = 1
+  }
+  if(PC == 0)
+  {
+    PD = 1
+  }
   PCT = PC * PD
+  if(PP == 0)
+  {
+    PP = 1
+  }
+  if(PCT == 0)
+  {
+    PCT = 1
+  }
   PCPP = PCT * PP
-  allProbs = c(PP,PC,PD, PCT, PCPP)
+  allProbs = matrix(c(PP,PC,PD, PCT, PCPP))
   return (allProbs)
 }
 
 pabxcd_cond_abxcd = function(fish, condif, season, locale, lightness, thickness)
 {
   #default prior probs 
-  a = c(1,1,1,1) * .25
-  b = c(1,1,1) * .33
-  c = c(1,1,1) * .33
-  d = c(1,1,1) * .33
+  #season
+  a = A
+  a = a *0
+  #local
+  b = B
+  b = b*0
+  #lightness
+  c = C[1,]
+  c = c*0
+  #size
+  d = D[1,]
+  d = d*0
+  ##light, thin, north atlantic, prob of season, prob of each class. 
+  for(zz in colnames(a))
+  {
+    if(zz == season)
+    {
+      a = a * 0
+      a[,season] = 1
+    }
+  }
+  for(zz in colnames(b))
+  {
+    if(zz == locale)
+    {
+      b = b * 0
+      b[,locale] = 1
+    }
+  }
+  for(zz in colnames(c))
+  {
+    if(zz == lightness)
+    {
+      c = c * 0
+      c[,lightness] = 1
+    }
+  }
+  for(zz in colnames(d))
+  { 
+    
+    if(zz == thickness)
+    {
+      d = d * 0
+      d[,thickness] = 1
+    }
+  }
   
+  sProb = pxabcd('salmon', a,b,c,d)
+  tProb = pxabcd('tuna', a,b,c,d)
+  seaProb = pxabcd('seabass', a,b,c,d)
   
-}
+ nSP = sProb[5]/(sProb[5]+tProb[5]+seaProb[5])
+ nTP = tProb[5]/(sProb[5]+tProb[5]+seaProb[5])
+ seaTP = seaProb[5]/(sProb[5]+tProb[5]+seaProb[5])
+print('salmon prob')
+print(nSP)
+print('tuna prob')
+print(nTP)
+print('seabass prob')
+print(seaTP)
+print('all probs')
+print(seaProb)
+print(tProb)
+print(sProb)
 
+}
+pabxcd_cond_abxcd(NULL, NULL, 'summer', 'northAtlantic','light','thin')
+pabxcd_cond_abxcd(NULL, NULL, 'NULL', 'northAtlantic','light','average')
+pabxcd_cond_abxcd(NULL, NULL, 'sunmmer', 'NULL','medium','thin')
+pabxcd_cond_abxcd(NULL, NULL, 'sunmmer', 'midAtlantic','dark','wide')
 
 
 X = t(matrix(c(0.6,0.2,0.2
