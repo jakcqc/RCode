@@ -5,7 +5,6 @@ Wage <- Wage
 attach(Wage)
 plot(age,wage,cex=.5,col="darkgrey")
 
-
 ############# Polynomial Linear Regression ################
 
 # Basis function for orthogonal polynomial
